@@ -48,10 +48,14 @@ export class Intersection {
         this.currentTick++;
         this.updateQueues();
 
+        // Update ticks in all traffic lights
+        this.trafficLights.forEach(light => light.tick());
+
         if (this.shouldSwitchLights()) {
             this.switchAllLights();
         }
     }
+
 
     private updateQueues(): void {
         this.trafficQueues.forEach(queue => queue.updateTick(this.currentTick));
@@ -75,44 +79,53 @@ export class Intersection {
     }
 
     private shouldSwitchBasedOnMetrics(metrics: Map<Direction, QueueMetrics>): boolean {
-        const greenDirections = new Set(
+        // Get directions where vehicles can pass (GREEN or YELLOW transitioning to GREEN)
+        const passingDirections = new Set(
             Array.from(this.trafficLights.entries())
-                .filter(([_, light]) => light.getState() === TrafficLightState.GREEN)
+                .filter(([_, light]) => {
+                    const state = light.getState();
+                    return state === TrafficLightState.GREEN || 
+                           (state === TrafficLightState.YELLOW && light.isTransitioningToGreen());
+                })
                 .map(([direction]) => direction)
         );
 
-        const redDirections = new Set(
+        // Get directions where vehicles must stop (RED or YELLOW transitioning to RED)
+        const stoppingDirections = new Set(
             Array.from(this.trafficLights.entries())
-                .filter(([_, light]) => light.getState() === TrafficLightState.RED)
+                .filter(([_, light]) => {
+                    const state = light.getState();
+                    return state === TrafficLightState.RED || 
+                           (state === TrafficLightState.YELLOW && light.isTransitioningToRed());
+                })
                 .map(([direction]) => direction)
         );
 
-        // If there's no traffic in green directions but traffic in red directions, switch
-        const hasGreenTraffic = Array.from(greenDirections)
+        // Check traffic presence
+        const hasPassingTraffic = Array.from(passingDirections)
             .some(direction => !this.trafficQueues.get(direction)?.isEmpty());
 
-        const hasRedTraffic = Array.from(redDirections)
+        const hasStoppingTraffic = Array.from(stoppingDirections)
             .some(direction => !this.trafficQueues.get(direction)?.isEmpty());
 
-        if (!hasGreenTraffic && hasRedTraffic) {
+        if (!hasPassingTraffic && hasStoppingTraffic) {
             return true;
         }
 
         // Calculate urgency scores
-        let greenUrgency = 0;
-        let redUrgency = 0;
+        let passingUrgency = 0;
+        let stoppingUrgency = 0;
 
         metrics.forEach((metric, direction) => {
             const urgencyScore = this.calculateUrgencyScore(metric);
-            if (greenDirections.has(direction)) {
-                greenUrgency += urgencyScore;
-            } else if (redDirections.has(direction)) {
-                redUrgency += urgencyScore;
+            if (passingDirections.has(direction)) {
+                passingUrgency += urgencyScore;
+            } else if (stoppingDirections.has(direction)) {
+                stoppingUrgency += urgencyScore;
             }
         });
 
-        // Switch if red direction urgency is higher
-        return redUrgency > greenUrgency;
+        return stoppingUrgency > passingUrgency;
     }
 
     private calculateUrgencyScore(metrics: QueueMetrics): number {
@@ -123,10 +136,25 @@ export class Intersection {
         this.trafficLights.forEach(light => light.switchState());
     }
 
+
+
     public canVehiclePass(fromDirection: Direction, turnDirection: TurnDirection): boolean {
         const light = this.trafficLights.get(fromDirection);
-        return light?.getState() === TrafficLightState.GREEN;
+        if (!light) return false;
+
+        switch (light.getState()) {
+            case TrafficLightState.GREEN:
+                return true;
+            case TrafficLightState.YELLOW:
+                // Allow passing only if transitioning from RED to GREEN
+                return light.isTransitioningToGreen();
+            case TrafficLightState.RED:
+                return false;
+            default:
+                return false;
+        }
     }
+
 
     public getTrafficLightState(direction: Direction): TrafficLightState {
         const light = this.trafficLights.get(direction);
