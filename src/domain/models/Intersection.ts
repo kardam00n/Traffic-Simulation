@@ -98,7 +98,7 @@ export class Intersection {
                 .filter(([_, light]) => {
                     const state = light.getState();
                     return state === TrafficLightState.GREEN || 
-                           (state === TrafficLightState.YELLOW && light.isTransitioningToGreen());
+                           state === TrafficLightState.YELLOW;
                 })
                 .map(([direction]) => direction)
         );
@@ -108,8 +108,7 @@ export class Intersection {
             Array.from(this.trafficLights.entries())
                 .filter(([_, light]) => {
                     const state = light.getState();
-                    return state === TrafficLightState.RED || 
-                           (state === TrafficLightState.YELLOW && light.isTransitioningToRed());
+                    return state === TrafficLightState.RED;
                 })
                 .map(([direction]) => direction)
         );
