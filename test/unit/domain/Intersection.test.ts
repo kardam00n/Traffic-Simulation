@@ -2,12 +2,17 @@ import { Intersection } from '../../../src/domain/models/Intersection';
 import { Direction, TurnDirection } from '../../../src/domain/models/Direction';
 import { TrafficLightState } from '../../../src/domain/models/TrafficLight';
 import { Vehicle } from '../../../src/domain/models/Vehicle';
+import {LoggerService} from "../../../src/infrastructure/logging/LoggerService";
+import {ConsoleLogger} from "../../../src/infrastructure/logging/ConsoleLogger";
 
 describe('Intersection', () => {
     let intersection: Intersection;
+    let logger: LoggerService
 
     beforeEach(() => {
         intersection = new Intersection();
+        LoggerService.getInstance().setLogger(new ConsoleLogger());
+        logger = LoggerService.getInstance();
     });
 
     describe('initialization', () => {
@@ -59,7 +64,7 @@ describe('Intersection', () => {
                 }
             });
 
-            it('should not allow passing when transitioning to RED', () => {
+            it('should allow passing when transitioning to RED', () => {
                 const vehicle = new Vehicle("1", Direction.NORTH, Direction.SOUTH, 0);
                 intersection.addVehicleToQueue(vehicle);
 
@@ -70,7 +75,7 @@ describe('Intersection', () => {
 
                 const eastLight = intersection.getTrafficLight(Direction.EAST);
                 if (eastLight.getState() === TrafficLightState.YELLOW && eastLight.isTransitioningToRed()) {
-                    expect(intersection.canVehiclePass(Direction.EAST, TurnDirection.STRAIGHT)).toBe(false);
+                    expect(intersection.canVehiclePass(Direction.EAST, TurnDirection.STRAIGHT)).toBe(true);
                 }
             });
         });

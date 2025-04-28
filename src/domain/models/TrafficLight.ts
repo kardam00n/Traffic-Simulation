@@ -1,3 +1,6 @@
+import {Direction} from "./Direction";
+import {LoggerService} from "../../infrastructure/logging/LoggerService"
+
 export enum TrafficLightState {
     RED = 'RED',
     YELLOW = 'YELLOW',
@@ -7,13 +10,16 @@ export enum TrafficLightState {
 export class TrafficLight {
     private state: TrafficLightState;
     private transitioning: boolean = false;
+    private direction: Direction
     private previousState: TrafficLightState;
     private ticksInCurrentState: number = 0;
     private readonly MIN_TICKS_IN_FULL_STATE = 1;
+    private readonly logger: LoggerService = LoggerService.getInstance();
 
-    constructor(initialState: TrafficLightState = TrafficLightState.RED) {
+    constructor(initialState: TrafficLightState = TrafficLightState.RED, direction: Direction = Direction.NORTH) {
         this.state = initialState;
         this.previousState = initialState;
+        this.direction = direction;
     }
 
     public tick(): void {
@@ -49,6 +55,7 @@ export class TrafficLight {
                 this.transitioning = true;
             }
         }
+        this.logger.info("Traffic light " + this.direction + " turned from " + this.previousState +  " to " + this.state)
 
         // Reset ticks counter when state changes
         this.ticksInCurrentState = 0;

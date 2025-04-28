@@ -1,10 +1,15 @@
 import { TrafficLight, TrafficLightState } from '../../../src/domain/models/TrafficLight';
+import {LoggerService} from "../../../src/infrastructure/logging/LoggerService";
+import {ConsoleLogger} from "../../../src/infrastructure/logging/ConsoleLogger";
 
 describe('TrafficLight', () => {
     let trafficLight: TrafficLight;
+    let logger: LoggerService
 
     beforeEach(() => {
         trafficLight = new TrafficLight();
+        LoggerService.getInstance().setLogger(new ConsoleLogger());
+        logger = LoggerService.getInstance();
     });
 
     describe('initialization', () => {

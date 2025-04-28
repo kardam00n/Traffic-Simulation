@@ -2,17 +2,20 @@ import { IVehicleRepository } from '../interfaces/IVehicleRepository';
 import { Intersection } from '../models/Intersection';
 import { Vehicle } from '../models/Vehicle';
 import { Direction } from '../models/Direction';
+import {LoggerService} from "../../infrastructure/logging/LoggerService";
 
 export class SimulationService {
     private currentTick: number = 0;
 
     constructor(
         private readonly vehicleRepository: IVehicleRepository,
-        private readonly intersection: Intersection
+        private readonly intersection: Intersection,
+        private readonly logger: LoggerService = LoggerService.getInstance(),
     ) {}
 
     public tick(): void {
         this.currentTick++;
+        this.logger.info("Next simulation step: step " + this.currentTick);
         this.updateIntersectionQueues();
         this.intersection.tick();
         this.processVehicles();
@@ -66,6 +69,8 @@ export class SimulationService {
 
     private completeVehicleJourney(vehicle: Vehicle): void {
         vehicle.setExitTime(this.currentTick);
+        this.logger.info("Vehicle " + vehicle.getId() + " drove " + vehicle.getTurnDirection() + " to " + vehicle.getToDirection() + " on step " + vehicle.getExitTime());
+
     }
 
     public getCurrentTick(): number {

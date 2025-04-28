@@ -1,13 +1,17 @@
 import { VehicleRepository } from '../../../src/infrastructure/repositories/VehicleRepository';
 import { Vehicle } from '../../../src/domain/models/Vehicle';
 import { Direction } from '../../../src/domain/models/Direction';
+import {LoggerService} from "../../../src/infrastructure/logging/LoggerService";
+import {ConsoleLogger} from "../../../src/infrastructure/logging/ConsoleLogger";
 
 describe('VehicleRepository', () => {
     let repository: VehicleRepository;
     let testVehicle: Vehicle;
-
+    let logger: LoggerService;
     beforeEach(() => {
         repository = new VehicleRepository();
+        LoggerService.getInstance().setLogger(new ConsoleLogger());
+        logger = LoggerService.getInstance()
         testVehicle = new Vehicle('test1', Direction.NORTH, Direction.SOUTH, 0);
     });
 

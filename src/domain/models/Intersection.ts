@@ -1,11 +1,13 @@
-import { TrafficLight, TrafficLightState } from './TrafficLight';
-import { Direction, TurnDirection } from './Direction';
-import { TrafficQueue, QueueMetrics } from './TrafficQueue';
-import { Vehicle } from './Vehicle';
+import {TrafficLight, TrafficLightState} from './TrafficLight';
+import {Direction, TurnDirection} from './Direction';
+import {QueueMetrics, TrafficQueue} from './TrafficQueue';
+import {Vehicle} from './Vehicle';
+import {LoggerService} from "../../infrastructure/logging/LoggerService";
 
 export class Intersection {
     private trafficLights: Map<Direction, TrafficLight>;
     private trafficQueues: Map<Direction, TrafficQueue>;
+    private readonly logger: LoggerService = LoggerService.getInstance();
     private currentTick: number = 0;
 
     constructor() {
@@ -17,11 +19,11 @@ export class Intersection {
 
     private initializeTrafficLights(): void {
         // North-South pair
-        this.trafficLights.set(Direction.NORTH, new TrafficLight(TrafficLightState.RED));
-        this.trafficLights.set(Direction.SOUTH, new TrafficLight(TrafficLightState.RED));
+        this.trafficLights.set(Direction.NORTH, new TrafficLight(TrafficLightState.RED, Direction.NORTH));
+        this.trafficLights.set(Direction.SOUTH, new TrafficLight(TrafficLightState.RED, Direction.SOUTH));
         // East-West pair
-        this.trafficLights.set(Direction.EAST, new TrafficLight(TrafficLightState.GREEN));
-        this.trafficLights.set(Direction.WEST, new TrafficLight(TrafficLightState.GREEN));
+        this.trafficLights.set(Direction.EAST, new TrafficLight(TrafficLightState.GREEN, Direction.EAST));
+        this.trafficLights.set(Direction.WEST, new TrafficLight(TrafficLightState.GREEN, Direction.WEST));
     }
 
     private initializeQueues(): void {
@@ -61,6 +63,7 @@ export class Intersection {
             this.switchAllLights();
         } else if (this.shouldSwitchLights()) {
             // Only check traffic conditions when not transitioning
+            this.logger.info("Initiated traffic light switch based on traffic queues.")
             this.switchAllLights();
         }
     }
@@ -156,8 +159,7 @@ export class Intersection {
             case TrafficLightState.GREEN:
                 return true;
             case TrafficLightState.YELLOW:
-                // Allow passing only if transitioning from RED to GREEN
-                return light.isTransitioningToGreen();
+                return true;
             case TrafficLightState.RED:
                 return false;
             default:

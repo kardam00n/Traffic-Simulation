@@ -3,11 +3,14 @@ import { IVehicleRepository } from '../../../src/domain/interfaces/IVehicleRepos
 import { Intersection } from '../../../src/domain/models/Intersection';
 import { Vehicle } from '../../../src/domain/models/Vehicle';
 import { Direction, TurnDirection } from '../../../src/domain/models/Direction';
+import {LoggerService} from "../../../src/infrastructure/logging/LoggerService";
+import {ConsoleLogger} from "../../../src/infrastructure/logging/ConsoleLogger";
 
 describe('SimulationService', () => {
     let simulationService: SimulationService;
     let vehicleRepository: jest.Mocked<IVehicleRepository>;
     let intersection: jest.Mocked<Intersection>;
+    let logger: LoggerService
 
     beforeEach(() => {
         vehicleRepository = {
@@ -25,6 +28,8 @@ describe('SimulationService', () => {
         } as unknown as jest.Mocked<Intersection>;
 
         simulationService = new SimulationService(vehicleRepository, intersection);
+        LoggerService.getInstance().setLogger(new ConsoleLogger());
+        logger = LoggerService.getInstance();
     });
 
 

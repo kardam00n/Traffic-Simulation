@@ -7,12 +7,15 @@ import { ProcessStepUseCase } from '../../src/application/useCases/ProcessStepUs
 import { RunSimulationUseCase } from '../../src/application/useCases/RunSimulationUseCase';
 import { ISimulationInput } from '../../src/domain/interfaces/ISimulationInput';
 import { TrafficLightState } from '../../src/domain/models/TrafficLight';
+import {LoggerService} from "../../src/infrastructure/logging/LoggerService";
+import {ConsoleLogger} from "../../src/infrastructure/logging/ConsoleLogger";
 
 describe('FullSimulation', () => {
     let vehicleRepository: VehicleRepository;
     let intersection: Intersection;
     let simulationService: SimulationService;
     let runSimulationUseCase: RunSimulationUseCase;
+    let logger: LoggerService;
 
     const didLeaveBeforeOrInSameStep = (stepStatuses: Array<{ leftVehicles: string[] }>) =>
         (vehicle1: string, vehicle2: string): boolean => {
@@ -38,6 +41,8 @@ describe('FullSimulation', () => {
             processStepUseCase,
             vehicleRepository
         );
+        LoggerService.getInstance().setLogger(new ConsoleLogger());
+        logger = LoggerService.getInstance();
     });
 
     it('should correctly simulate a complex traffic scenario', () => {

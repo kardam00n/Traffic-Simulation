@@ -1,15 +1,19 @@
 import { IVehicleRepository } from '../../domain/interfaces/IVehicleRepository';
 import { Vehicle } from '../../domain/models/Vehicle';
 import {Direction} from "../../domain/models/Direction";
+import {LoggerService} from "../logging/LoggerService";
 
 export class VehicleRepository implements IVehicleRepository {
     private vehicles: Map<string, Vehicle> = new Map();
+    private readonly logger: LoggerService = LoggerService.getInstance();
 
     public add(vehicle: Vehicle): void {
         if (this.vehicles.has(vehicle.getId())) {
             throw new Error(`Vehicle with id ${vehicle.getId()} already exists`);
         }
         this.vehicles.set(vehicle.getId(), vehicle);
+        this.logger.info("Added vehicle " + vehicle.getId() + " driving from " + vehicle.getFromDirection() + " to " + vehicle.getToDirection());
+
     }
 
     public remove(vehicleId: string): void {

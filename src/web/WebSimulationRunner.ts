@@ -1,12 +1,14 @@
 import { SimulationRunner } from '../application/SimulationRunner';
 import { ISimulationInput, SimulationCommand } from '../domain/interfaces/ISimulationInput';
 import { ISimulationOutput } from '../domain/interfaces/ISimulationOutput';
+import {LoggerService} from "../infrastructure/logging/LoggerService";
 
 export class WebSimulationRunner {
     private simulationRunner: SimulationRunner;
     private currentCommandIndex: number = 0;
     private input: ISimulationInput | null = null;
     private output: ISimulationOutput | null = null;
+    private readonly logger: LoggerService = LoggerService.getInstance()
 
     constructor() {
         this.simulationRunner = new SimulationRunner();
@@ -18,7 +20,7 @@ export class WebSimulationRunner {
         this.output = {
             stepStatuses: []
         };
-        // Create a fresh SimulationRunner instance for new simulation
+        this.logger.info("Simulation started")
         this.simulationRunner = new SimulationRunner();
     }
 
@@ -59,6 +61,7 @@ export class WebSimulationRunner {
 
     public getCurrentCommand(): SimulationCommand | null {
         if (!this.input || this.isComplete()) {
+            this.logger.info("Simulation Complete")
             return null;
         }
         return this.input.commands[this.currentCommandIndex];

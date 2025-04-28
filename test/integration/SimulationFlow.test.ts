@@ -6,6 +6,8 @@ import { AddVehicleUseCase } from '../../src/application/useCases/AddVehicleUseC
 import { ProcessStepUseCase } from '../../src/application/useCases/ProcessStepUseCase';
 import { RunSimulationUseCase } from '../../src/application/useCases/RunSimulationUseCase';
 import { ISimulationInput } from '../../src/domain/interfaces/ISimulationInput';
+import {LoggerService} from "../../src/infrastructure/logging/LoggerService";
+import {ConsoleLogger} from "../../src/infrastructure/logging/ConsoleLogger";
 
 describe('SimulationFlow', () => {
     let vehicleRepository: VehicleRepository;
@@ -14,6 +16,7 @@ describe('SimulationFlow', () => {
     let addVehicleUseCase: AddVehicleUseCase;
     let processStepUseCase: ProcessStepUseCase;
     let runSimulationUseCase: RunSimulationUseCase;
+    let logger: LoggerService;
 
     beforeEach(() => {
         vehicleRepository = new VehicleRepository();
@@ -27,6 +30,8 @@ describe('SimulationFlow', () => {
             processStepUseCase,
             vehicleRepository
         );
+        LoggerService.getInstance().setLogger(new ConsoleLogger());
+        logger = LoggerService.getInstance();
     });
 
     it('should process a complete simulation flow', () => {

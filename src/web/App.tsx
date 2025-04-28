@@ -7,6 +7,7 @@ import {Direction} from '../domain/models/Direction';
 import {TrafficLightState} from '../domain/models/TrafficLight';
 import {Vehicle} from '../domain/models/Vehicle';
 import {TrafficQueue} from "../domain/models/TrafficQueue";
+import {LoggerService} from "../infrastructure/logging/LoggerService";
 
 export const App: React.FC = () => {
     const [runner] = useState(() => new WebSimulationRunner());
@@ -27,7 +28,7 @@ export const App: React.FC = () => {
         [Direction.SOUTH, new TrafficQueue(Direction.SOUTH)],
         [Direction.EAST, new TrafficQueue(Direction.EAST)],
         [Direction.WEST, new TrafficQueue(Direction.WEST)],
-   ]));
+    ]));
 
     const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
@@ -101,6 +102,7 @@ export const App: React.FC = () => {
                     onChange={handleFileUpload}
                 />
             </div>
+
             <div style={{ marginBottom: '20px' }}>
                 <button
                     onClick={handleNextCommand}
@@ -124,9 +126,14 @@ export const App: React.FC = () => {
                 trafficQueues={trafficQueues}
             />
 
+            <div id="log" style={{ marginTop: '100px' }}>
+            <h2>Logger</h2>
+            </div>
+
             {output && (
                 <div>
-                    <h2>Command Index: {runner.getCurrentCommandIndex()}</h2>
+                    <h2>Current output</h2>
+                    <h3>Command Index: {runner.getCurrentCommandIndex()}</h3>
                     <pre style={{
                         backgroundColor: '#f5f5f5',
                         padding: '10px',

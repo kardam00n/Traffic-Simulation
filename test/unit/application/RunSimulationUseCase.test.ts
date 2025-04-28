@@ -5,12 +5,15 @@ import { ProcessStepUseCase } from '../../../src/application/useCases/ProcessSte
 import { VehicleRepository } from '../../../src/infrastructure/repositories/VehicleRepository';
 import { Intersection } from '../../../src/domain/models/Intersection';
 import { ISimulationInput } from '../../../src/domain/interfaces/ISimulationInput';
+import {LoggerService} from "../../../src/infrastructure/logging/LoggerService";
+import {ConsoleLogger} from "../../../src/infrastructure/logging/ConsoleLogger";
 
 describe('RunSimulationUseCase', () => {
     let runSimulationUseCase: RunSimulationUseCase;
     let vehicleRepository: VehicleRepository;
     let intersection: Intersection;
     let simulationService: SimulationService;
+    let logger: LoggerService;
 
     beforeEach(() => {
         vehicleRepository = new VehicleRepository();
@@ -25,6 +28,8 @@ describe('RunSimulationUseCase', () => {
             processStepUseCase,
             vehicleRepository
         );
+        LoggerService.getInstance().setLogger(new ConsoleLogger());
+        logger = LoggerService.getInstance();
     });
 
     it('should process simulation commands and generate correct output', () => {

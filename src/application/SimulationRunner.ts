@@ -6,6 +6,7 @@ import { VehicleRepository } from '../infrastructure/repositories/VehicleReposit
 import { Intersection } from '../domain/models/Intersection';
 import { ISimulationInput } from '../domain/interfaces/ISimulationInput';
 import { ISimulationOutput } from '../domain/interfaces/ISimulationOutput';
+import {LoggerService} from "../infrastructure/logging/LoggerService";
 
 export class SimulationRunner {
     public readonly vehicleRepository: VehicleRepository;
