@@ -70,6 +70,7 @@ The simulation is available in two versions:
 
 To run the simulation in console mode:
 ```bash
+  npm install
   npm run start input.json output.json
 ```
 Where `input.json` contains the simulation parameters and `output.json` is where results will be written.
@@ -80,6 +81,7 @@ The simulation processes all steps at once, with event logs displayed in the con
 
 To run the simulation in web mode:
 ```bash
+  npm install
   npm run start:web
 ```
 
