@@ -7,33 +7,144 @@ describe('TrafficLight', () => {
         trafficLight = new TrafficLight();
     });
 
-    it('should initialize with RED state by default', () => {
-        expect(trafficLight.getState()).toBe(TrafficLightState.RED);
+    describe('initialization', () => {
+        it('should initialize with RED state by default', () => {
+            expect(trafficLight.getState()).toBe(TrafficLightState.RED);
+            expect(trafficLight.getPreviousState()).toBe(TrafficLightState.RED);
+            expect(trafficLight.isTransitioning()).toBe(false);
+        });
+
+        it('should initialize with specified state', () => {
+            const greenLight = new TrafficLight(TrafficLightState.GREEN);
+            expect(greenLight.getState()).toBe(TrafficLightState.GREEN);
+            expect(greenLight.getPreviousState()).toBe(TrafficLightState.GREEN);
+            expect(greenLight.isTransitioning()).toBe(false);
+        });
     });
 
-    it('should change from RED to GREEN after RED_DURATION ticks', () => {
-        // Simulate 30 ticks (RED_DURATION)
-        for (let i = 0; i < 30; i++) {
+    describe('state transitions', () => {
+        describe('from RED state', () => {
+            it('should not switch state before minimum ticks', () => {
+                trafficLight.switchState();
+                expect(trafficLight.getState()).toBe(TrafficLightState.RED);
+                expect(trafficLight.isTransitioning()).toBe(false);
+            });
+
+            it('should transition to YELLOW (towards GREEN) after minimum ticks', () => {
+                trafficLight.tick();
+                trafficLight.switchState();
+                expect(trafficLight.getState()).toBe(TrafficLightState.YELLOW);
+                expect(trafficLight.getPreviousState()).toBe(TrafficLightState.RED);
+                expect(trafficLight.isTransitioning()).toBe(true);
+                expect(trafficLight.isTransitioningToGreen()).toBe(true);
+                expect(trafficLight.isTransitioningToRed()).toBe(false);
+            });
+        });
+
+        describe('from GREEN state', () => {
+            beforeEach(() => {
+                trafficLight = new TrafficLight(TrafficLightState.GREEN);
+            });
+
+            it('should not switch state before minimum ticks', () => {
+                trafficLight.switchState();
+                expect(trafficLight.getState()).toBe(TrafficLightState.GREEN);
+                expect(trafficLight.isTransitioning()).toBe(false);
+            });
+
+            it('should transition to YELLOW (towards RED) after minimum ticks', () => {
+                trafficLight.tick();
+                trafficLight.switchState();
+                expect(trafficLight.getState()).toBe(TrafficLightState.YELLOW);
+                expect(trafficLight.getPreviousState()).toBe(TrafficLightState.GREEN);
+                expect(trafficLight.isTransitioning()).toBe(true);
+                expect(trafficLight.isTransitioningToRed()).toBe(true);
+                expect(trafficLight.isTransitioningToGreen()).toBe(false);
+            });
+        });
+
+        describe('from YELLOW state', () => {
+            it('should complete transition to GREEN when coming from RED', () => {
+                // Setup: RED -> YELLOW transition
+                trafficLight.tick();
+                trafficLight.switchState();
+                expect(trafficLight.getState()).toBe(TrafficLightState.YELLOW);
+                expect(trafficLight.isTransitioningToGreen()).toBe(true);
+
+                // Complete transition: YELLOW -> GREEN
+                trafficLight.switchState();
+                expect(trafficLight.getState()).toBe(TrafficLightState.GREEN);
+                expect(trafficLight.getPreviousState()).toBe(TrafficLightState.YELLOW);
+                expect(trafficLight.isTransitioning()).toBe(false);
+            });
+
+            it('should complete transition to RED when coming from GREEN', () => {
+                // Setup: Start with GREEN
+                trafficLight = new TrafficLight(TrafficLightState.GREEN);
+                trafficLight.tick();
+                trafficLight.switchState(); // GREEN -> YELLOW
+                expect(trafficLight.getState()).toBe(TrafficLightState.YELLOW);
+                expect(trafficLight.isTransitioningToRed()).toBe(true);
+
+                // Complete transition: YELLOW -> RED
+                trafficLight.switchState();
+                expect(trafficLight.getState()).toBe(TrafficLightState.RED);
+                expect(trafficLight.getPreviousState()).toBe(TrafficLightState.YELLOW);
+                expect(trafficLight.isTransitioning()).toBe(false);
+            });
+
+            it('should allow immediate switch from YELLOW without additional ticks', () => {
+                trafficLight.tick();
+                trafficLight.switchState(); // RED -> YELLOW
+                expect(trafficLight.canSwitch()).toBe(true);
+                trafficLight.switchState(); // YELLOW -> GREEN (immediate)
+                expect(trafficLight.getState()).toBe(TrafficLightState.GREEN);
+            });
+        });
+    });
+
+    describe('tick behavior', () => {
+        it('should accumulate ticks until state change', () => {
             trafficLight.tick();
-        }
-        expect(trafficLight.getState()).toBe(TrafficLightState.RED_AND_YELLOW);
+            expect(trafficLight.canSwitch()).toBe(true);
+            trafficLight.switchState();
+            expect(trafficLight.canSwitch()).toBe(true); // YELLOW can always switch
+        });
+
+        it('should reset ticks after state change', () => {
+            trafficLight.tick();
+            trafficLight.switchState(); // RED -> YELLOW
+            trafficLight.switchState(); // YELLOW -> GREEN
+            expect(trafficLight.canSwitch()).toBe(false); // Needs new ticks in GREEN
+        });
     });
 
-    it('should complete full cycle correctly', () => {
-        // RED -> GREEN (after 30 ticks)
-        for (let i = 0; i < 30; i++) trafficLight.tick();
-        expect(trafficLight.getState()).toBe(TrafficLightState.RED_AND_YELLOW);
+    describe('full cycle behavior', () => {
+        it('should complete full RED->GREEN->RED cycle with minimum ticks', () => {
+            // Start: RED
+            expect(trafficLight.getState()).toBe(TrafficLightState.RED);
 
-        // YELLOW -> RED (after 5 more ticks)
-        for (let i = 0; i < 5; i++) trafficLight.tick();
-        expect(trafficLight.getState()).toBe(TrafficLightState.GREEN);
+            // RED -> YELLOW (towards GREEN)
+            trafficLight.tick();
+            trafficLight.switchState();
+            expect(trafficLight.getState()).toBe(TrafficLightState.YELLOW);
+            expect(trafficLight.isTransitioningToGreen()).toBe(true);
 
-        // GREEN -> YELLOW (after 30 more ticks)
-        for (let i = 0; i < 30; i++) trafficLight.tick();
-        expect(trafficLight.getState()).toBe(TrafficLightState.YELLOW);
+            // YELLOW -> GREEN
+            trafficLight.switchState();
+            expect(trafficLight.getState()).toBe(TrafficLightState.GREEN);
+            expect(trafficLight.isTransitioning()).toBe(false);
 
-        // YELLOW -> RED (after 5 more ticks)
-        for (let i = 0; i < 5; i++) trafficLight.tick();
-        expect(trafficLight.getState()).toBe(TrafficLightState.RED);
+            // GREEN -> YELLOW (towards RED)
+            trafficLight.tick();
+            trafficLight.switchState();
+            expect(trafficLight.getState()).toBe(TrafficLightState.YELLOW);
+            expect(trafficLight.isTransitioningToRed()).toBe(true);
+
+            // YELLOW -> RED
+            trafficLight.switchState();
+            expect(trafficLight.getState()).toBe(TrafficLightState.RED);
+            expect(trafficLight.isTransitioning()).toBe(false);
+        });
     });
 });

@@ -20,9 +20,12 @@ export class SimulationService {
 
     private processVehicles(): void {
         const processedDirections = new Set<Direction>();
-        const activeVehicles = this.vehicleRepository.getAllActive();
+        const activeVehicles = this.vehicleRepository.getAllActive() || [];
 
-        // Sort vehicles by entry time to process oldest first
+        if (!Array.isArray(activeVehicles) || activeVehicles.length === 0) {
+            return;
+        }
+
         const sortedVehicles = [...activeVehicles].sort((a, b) =>
             a.getEntryTime() - b.getEntryTime()
         );
@@ -30,7 +33,6 @@ export class SimulationService {
         for (const vehicle of sortedVehicles) {
             const direction = vehicle.getFromDirection();
 
-            // Skip if we already processed a vehicle from this direction
             if (processedDirections.has(direction)) {
                 continue;
             }
@@ -43,14 +45,17 @@ export class SimulationService {
         }
     }
 
+
     private updateIntersectionQueues(): void {
         this.intersection.clearAllQueues();
 
-        const activeVehicles = this.vehicleRepository.getAllActive();
+        const activeVehicles = this.vehicleRepository.getAllActive() || [];
         activeVehicles.forEach(vehicle => {
             this.intersection.addVehicleToQueue(vehicle);
         });
     }
+
+
 
     private canVehiclePass(vehicle: Vehicle): boolean {
         return this.intersection.canVehiclePass(

@@ -36,10 +36,10 @@ export class TrafficLight {
 
         if (this.transitioning) {
             // Complete the transition
-            this.previousState = TrafficLightState.YELLOW;
             this.state = this.isTransitioningToRed()
                 ? TrafficLightState.RED
                 : TrafficLightState.GREEN;
+            this.previousState = TrafficLightState.YELLOW;
             this.transitioning = false;
         } else {
             // Start the transition

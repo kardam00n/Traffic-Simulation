@@ -44,6 +44,7 @@ export class Intersection {
         }
     }
 
+
     public tick(): void {
         this.currentTick++;
         this.updateQueues();
@@ -51,10 +52,19 @@ export class Intersection {
         // Update ticks in all traffic lights
         this.trafficLights.forEach(light => light.tick());
 
-        if (this.shouldSwitchLights()) {
+        // Check if any lights are transitioning (should use isTransitioning instead of checking YELLOW state)
+        const hasTransitioningLights = Array.from(this.trafficLights.values())
+            .some(light => light.isTransitioning());  // Change this line
+
+        // If any lights are transitioning, complete the transition regardless of metrics
+        if (hasTransitioningLights) {
+            this.switchAllLights();
+        } else if (this.shouldSwitchLights()) {
+            // Only check traffic conditions when not transitioning
             this.switchAllLights();
         }
     }
+
 
 
     private updateQueues(): void {
@@ -161,4 +171,11 @@ export class Intersection {
         if (!light) throw new Error(`No traffic light for direction ${direction}`);
         return light.getState();
     }
+
+    public getTrafficLight(direction: Direction): TrafficLight {
+        const light = this.trafficLights.get(direction);
+        if (!light) throw new Error(`No traffic light for direction ${direction}`);
+        return light;
+    }
+
 }
