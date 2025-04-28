@@ -19,6 +19,7 @@ export class Vehicle {
         this.toDirection = toDirection;
         this.entryTime = entryTime;
         this.turnDirection = determineTurnDirection(fromDirection, toDirection);
+        console.log("from: ", this.fromDirection)
     }
 
     public getId(): string {

@@ -5,9 +5,12 @@
   "scripts": {
     "build": "tsc",
     "start": "ts-node src/main.ts",
+    "start:web": "webpack serve --mode development",
+    "build:web": "webpack --mode production",
     "test": "jest",
     "test:watch": "jest --watch"
   },
+
   "keywords": [],
   "author": "",
   "license": "ISC",

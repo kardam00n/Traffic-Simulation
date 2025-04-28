@@ -8,20 +8,23 @@ import { ISimulationInput } from '../domain/interfaces/ISimulationInput';
 import { ISimulationOutput } from '../domain/interfaces/ISimulationOutput';
 
 export class SimulationRunner {
+    public readonly vehicleRepository: VehicleRepository;
+    public readonly intersection: Intersection;
+    private readonly simulationService: SimulationService;
     private readonly runSimulationUseCase: RunSimulationUseCase;
 
     constructor() {
-        const vehicleRepository = new VehicleRepository();
-        const intersection = new Intersection();
-        const simulationService = new SimulationService(vehicleRepository, intersection);
-        const addVehicleUseCase = new AddVehicleUseCase(vehicleRepository);
-        const processStepUseCase = new ProcessStepUseCase(simulationService);
+        this.vehicleRepository = new VehicleRepository();
+        this.intersection = new Intersection();
+        this.simulationService = new SimulationService(this.vehicleRepository, this.intersection);
+        const addVehicleUseCase = new AddVehicleUseCase(this.vehicleRepository);
+        const processStepUseCase = new ProcessStepUseCase(this.simulationService);
 
         this.runSimulationUseCase = new RunSimulationUseCase(
-            simulationService,
+            this.simulationService,
             addVehicleUseCase,
             processStepUseCase,
-            vehicleRepository
+            this.vehicleRepository
         );
     }
 

@@ -172,6 +172,12 @@ export class Intersection {
         return light.getState();
     }
 
+    public getTrafficQueue(direction: Direction): TrafficQueue{
+        const trafficQueue = this.trafficQueues.get(direction);
+        if(!trafficQueue) throw new Error(`No traffic queue for direction ${direction}`);
+        return trafficQueue;
+    }
+
     public getTrafficLight(direction: Direction): TrafficLight {
         const light = this.trafficLights.get(direction);
         if (!light) throw new Error(`No traffic light for direction ${direction}`);

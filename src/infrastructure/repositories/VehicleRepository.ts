@@ -1,5 +1,6 @@
 import { IVehicleRepository } from '../../domain/interfaces/IVehicleRepository';
 import { Vehicle } from '../../domain/models/Vehicle';
+import {Direction} from "../../domain/models/Direction";
 
 export class VehicleRepository implements IVehicleRepository {
     private vehicles: Map<string, Vehicle> = new Map();
@@ -28,4 +29,11 @@ export class VehicleRepository implements IVehicleRepository {
     public getAllActive(): Vehicle[] {
         return this.getAll().filter(vehicle => vehicle.getExitTime() === null);
     }
+    public getVehiclesInDirection(direction: Direction): Vehicle[] {
+        return this.getAll().filter(vehicle =>
+            vehicle.getFromDirection() === direction &&
+            vehicle.getExitTime() === null // Only include vehicles that haven't exited
+        );
+    }
+
 }

@@ -8,7 +8,7 @@
 
     "startRoad": "south",
 
-    "endRoad": "north"
+    "endRoad": "west"
 
   },
 
@@ -20,7 +20,7 @@
 
     "startRoad": "north",
 
-    "endRoad": "south"
+    "endRoad": "west"
 
   },
   {
